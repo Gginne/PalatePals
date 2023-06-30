@@ -1,62 +1,90 @@
 import { useEffect } from "react";
-import { Card, Container} from "react-bootstrap";
-import { useParams } from 'react-router-dom';
+import { Card, Container, Navbar, Nav, Button } from "react-bootstrap";
+import { Link, useParams } from "react-router-dom";
 import { db } from "../firebase";
-import { useAuth } from "../contexts/AuthContext"
-import { useState } from 'react'
+import { useAuth } from "../contexts/AuthContext";
+import { useState } from "react";
 import useNearbyRestaurants from "../hooks/useNearbyRestaurants";
-
+import RestaurantCard from "./places/RestaurantCard";
 export default function Session() {
-    let { sessionId } = useParams();
-    const { currentUser } = useAuth()
-    const [isAuthorized, setIsAuthorized] = useState(false)
+  let { sessionId } = useParams();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const { currentUser } = useAuth();
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-    const restaurantRequest = useNearbyRestaurants(sessionId);
+  const restaurantRequest = useNearbyRestaurants(sessionId);
 
-    useEffect(() => {
-        const validateUser = async() => {
-            try {
-                const doc = await db.sessions.doc(sessionId).get()
-                const users = doc.data().users
-                if(users.includes(currentUser.uid)) {
-                    setIsAuthorized(true)
-                } else {
-                    setIsAuthorized(false)
-                }
-            } catch (err) {
-                console.log(err)
-            }
+  const handleSwipeLeft = (restaurant) => {
+    // Handle swiping left action
+    console.log(`Swiped left on ${restaurant.name}`);
+    nextCard();
+  };
+
+  const handleSwipeRight = (restaurant) => {
+    // Handle swiping right action
+    console.log(`Swiped right on ${restaurant.name}`);
+    nextCard();
+  };
+
+  const nextCard = () => {
+    setCurrentIndex(
+      (prevIndex) => (prevIndex + 1) % restaurantRequest.data.length
+    );
+  };
+
+  useEffect(() => {
+    const validateUser = async () => {
+      try {
+        const doc = await db.sessions.doc(sessionId).get();
+        const users = doc.data().users;
+        if (users.includes(currentUser.uid)) {
+          setIsAuthorized(true);
+        } else {
+          setIsAuthorized(false);
         }
+      } catch (err) {
+        console.log(err);
+      }
+    };
 
-        validateUser()
+    validateUser();
 
-        console.log(restaurantRequest.data)
-        
-    }, [currentUser.uid, sessionId, restaurantRequest.data])
+    console.log(restaurantRequest.data);
+  }, [currentUser.uid, sessionId, restaurantRequest.data]);
 
-    return(
-        <div>
-            {isAuthorized && (
-                <>
-                <Card className="shadow-sm">
-                    <Card.Body>
-                        <Card.Title>
-                            Session ID {sessionId}
-                        </Card.Title>
-                    </Card.Body>
-                </Card>
-                <Container className="my-3">
-                    
-                </Container>
-                </>
+  return (
+    <div>
+      {isAuthorized && (
+        <>
+          <Navbar className="bg-white shadow-sm" data-bs-theme="dark">
+            <Container>
+              <Navbar.Brand>Session ID {sessionId}</Navbar.Brand>
+              <Nav className="me-auto">
+                <Button className="mx-2" variant="success">Submit</Button>
+                <Button className="mx-2" variant="danger" as={Link} to="/" >Exit</Button>
+              </Nav>
+            </Container>
+          </Navbar>
+          <Container className="mt-5 d-flex justify-content-center">
+            {restaurantRequest.data.length > 0 ? (
+              <RestaurantCard
+                data={restaurantRequest.data[currentIndex]}
+                onSwipeLeft={handleSwipeLeft}
+                onSwipeRight={handleSwipeRight}
+              />
+            ) : (
+              <p>No restaurants available.</p>
             )}
-            {!isAuthorized && (
-                <Card>
-                    <Card.Title>
-                        Sorry, you are not authorized to join this session.
-                    </Card.Title>
-                </Card>
-            )}
-        </div>
-    )
+          </Container>
+        </>
+      )}
+      {!isAuthorized && (
+        <Card>
+          <Card.Title>
+            Sorry, you are not authorized to join this session.
+          </Card.Title>
+        </Card>
+      )}
+    </div>
+  );
 }
