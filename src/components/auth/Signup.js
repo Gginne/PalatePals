@@ -27,8 +27,9 @@ export default function Signup() {
       setLoading(true)
       await signup(emailRef.current.value, passwordRef.current.value)
       navigate("/")
-    } catch {
-      setError("Failed to create an account")
+    } catch(e) {
+      console.log(e)
+      setError(String(e))
     }
 
     setLoading(false)
