@@ -13,7 +13,7 @@ export default function Session() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const restaurantRequest = useNearbyRestaurants(sessionId);
-  console.log(restaurantRequest.data)
+  console.log(restaurantRequest)
 
   const handleSwipeLeft = (restaurant) => {
     // Handle swiping left action

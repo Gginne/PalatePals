@@ -7,7 +7,7 @@ export default function RestaurantCard({ data, onSwipeLeft, onSwipeRight }) {
       <Card.Body>
         <Card.Title>{data.name}</Card.Title>
         <Card.Text>
-          {data.location.formatted_address}<br />
+          {data.address}<br />
           <small className="text-muted">Distance: {data.distance} meters</small>
         </Card.Text>
         <div>

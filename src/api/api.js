@@ -37,8 +37,6 @@ export const getRestaurants =  async (lat, long, radius) => {
         params: {...params, ll, radius, query: 'restaurant'}, headers }
       )
 
-      console.log(response)
-
       const {results} = response.data;
       return results
 

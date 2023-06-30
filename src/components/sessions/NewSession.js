@@ -48,7 +48,7 @@ function NewSession() {
           swipes: [],
           name: restaurant.name,
           distance: restaurant.distance,
-          addres: restaurant.location.formatted_address,
+          address: restaurant.location.formatted_address,
           categories: restaurant.categories
         })
      })
