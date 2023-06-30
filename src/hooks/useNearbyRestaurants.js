@@ -1,20 +1,24 @@
 import axios from "axios";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useState } from "react";
+import { db } from "../firebase";
 
-export default function useNearbyRestaurants(){
+export default function useNearbyRestaurants(sessionId){
     const [data, setData] = useState([])
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
-    const latitude = 40.748817; // Latitude of the target location
-    const longitude = -73.985428; // Longitude of the target location
-    const radius = 1000; // Radius in meters
 
     const foursquareApiUrl = 'https://api.foursquare.com/v3/places/search';
-    const version = '20230628'; // Specify the desired API version
+    const version = '20230628'; // Specify the desired API versio
+  
 
-    const getNearbyRestaurants = useCallback(async () => {
-          
+    useEffect(() => {
+      const fetchAll = async () => {
+        const session = await db.sessions.doc(sessionId).get()
+        const {lat, long, radius} = session.data()
+
+     
+
         const params = {
             client_id: process.env.REACT_APP_FS_CLIENT_ID,
             client_secret: process.env.REACT_APP_FS_CLIENT_SECRET,
@@ -28,13 +32,15 @@ export default function useNearbyRestaurants(){
 
         try{
           setLoading(true)
-          const ll = `${latitude},${longitude}`
+          const ll = `${lat},${long}`
           const response = await axios.get(foursquareApiUrl, {
             params: {...params, ll, radius, query: 'restaurant'}, headers }
           )
 
+          console.log(response)
+
           const {results} = response.data;
-          
+          console.log(results)
           setData(results)
 
           
@@ -45,15 +51,13 @@ export default function useNearbyRestaurants(){
           setLoading(false)
         }
         
-    }, [latitude, longitude])
-        
-    // Make the API request
-    useEffect(() => {
+    }
 
-        getNearbyRestaurants()
-          
-    }, [getNearbyRestaurants])
+    fetchAll()
+    }, [sessionId])
+
+    
  
 
-    return {data, error, loading}
+    return { data, error, loading}
 }

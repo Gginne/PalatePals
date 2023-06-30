@@ -14,7 +14,10 @@ function NewSession() {
 
   function handleChangeNewSession(e) {
     const key = e.target.name;
-    const value = e.target.value;
+    let value = e.target.value;
+    if(key === 'radius'){
+      value = Number(value)*1609
+    }
     setFormData({ ...formData, [key]: value });
   }
 
@@ -67,7 +70,7 @@ function NewSession() {
         />
       </Form.Group>
       <Form.Group>
-        <Form.Label>Radius</Form.Label>
+        <Form.Label>Radius (Miles)</Form.Label>
         <Form.Control
           type="number"
           name="radius"

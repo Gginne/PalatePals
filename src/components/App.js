@@ -15,11 +15,14 @@ function App() {
         <Routes>
           {/* Protected Routes */}
           
-       
-          <Route element={<AuthLayout />}>
+        
+        <Route element={<AuthLayout />}>
             
             <Route exact path="/" element={<Dashboard />} />
+
+        
             <Route exact path='/session/:sessionId' element={<Session />} />
+            
           
         </Route>
         
