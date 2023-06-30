@@ -9,39 +9,17 @@ export default function useNearbyRestaurants(sessionId){
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
 
-    const foursquareApiUrl = 'https://api.foursquare.com/v3/places/search';
-    const version = '20230628'; // Specify the desired API versio
-
     const fetchAll =  useCallback(async () => {
-      const session = await db.sessions.doc(sessionId).get()
-      const {lat, long, radius} = session.data()
 
-   
-
-      const params = {
-          client_id: process.env.REACT_APP_FS_CLIENT_ID,
-          client_secret: process.env.REACT_APP_FS_CLIENT_SECRET,
-          v: version
-      }
-
-      const headers = {
-        'Accept': 'application/json',
-        'Authorization': process.env.REACT_APP_FS_API_KEY,
-      }
-
-      try{
+      try {
         setLoading(true)
-        const ll = `${lat},${long}`
-        const response = await axios.get(foursquareApiUrl, {
-          params: {...params, ll, radius, query: 'restaurant'}, headers }
-        )
-
-        console.log(response)
-
-        const {results} = response.data;
-        console.log(results)
-        setData(results)
-
+        const sess = await db.sessions.doc(sessionId).collection('restaurants')
+        const restaurants = sess.get().then((querySnapshot) => {
+          console.log(querySnapshot)
+          const documentArray = querySnapshot.map(doc => doc.data())
+          console.log(documentArray)
+          setData(documentArray)
+        });
         
       } catch(err) {
         setError(err)
@@ -56,9 +34,6 @@ export default function useNearbyRestaurants(sessionId){
 
     fetchAll()
     }, [sessionId, fetchAll])
-
-    
- 
 
     return { data, error, loading}
 }

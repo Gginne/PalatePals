@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { db } from "../../firebase";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from 'react-router-dom';
+import { getLocation, getRestaurants } from "../../api/api";
 
 function NewSession() {
   const { currentUser } = useAuth();
@@ -21,24 +22,9 @@ function NewSession() {
     setFormData({ ...formData, [key]: value });
   }
 
-  const getLocation = async () => {
-    try {
-        const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?address=${formData.location}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`
-          )
-      
-          const jsonData = response.json()
-          return jsonData;
-
-    } catch (err){
-        console.log(err)
-        return err
-    }
-  };
-
   const createNewSession = async (event) => {
     event.preventDefault();
-    const obj = await getLocation();
+    const obj = await getLocation(formData.location);
 
     const lat = obj.results[0].geometry.location.lat;
     const long = obj.results[0].geometry.location.lng;
@@ -51,6 +37,21 @@ function NewSession() {
     };
     try {
      const result = await db.sessions.add(data);
+     const restaurantRequest = await getRestaurants(lat, long, formData.radius);
+     console.log(restaurantRequest)
+     const sess = await db.sessions.doc(result.id)
+     const restaurants = sess.collection("restaurants"); 
+     restaurantRequest.forEach(restaurant => {
+        const id = restaurant.fsq_id
+        const currRestaurant = restaurants.doc(id)
+        currRestaurant.set({
+          swipes: [],
+          name: restaurant.name,
+          distance: restaurant.distance,
+          addres: restaurant.location.formatted_address,
+          categories: restaurant.categories
+        })
+     })
      navigate(`/session/${result.id}`)
     } catch (e) {
       console.log(e);
