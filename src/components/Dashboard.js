@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Card, Tab, Tabs } from "react-bootstrap";
-import useNearbyRestaurants from "../hooks/useNearbyRestaurants";
+import { Button, Card, Tab, Tabs } from "react-bootstrap";
 import CenteredContainer from "./commons/CenteredContainer";
 import NewSession from "./sessions/NewSession";
 import JoinExistingSession from "./sessions/JoinExistingSession";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Dashboard() {
- 
+  const {logout} = useAuth()
+
   const [form, setForm] = useState("join");
   return (
     <CenteredContainer>
@@ -28,6 +29,7 @@ export default function Dashboard() {
             
           </Tabs>
         </Card.Body>
+        <Button variant="danger" onClick={logout}>Logout</Button>
       </Card>
     </CenteredContainer>
   );

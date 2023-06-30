@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import CenteredContainer from "./commons/CenteredContainer";
-import { Card} from "react-bootstrap";
+import { Card, Container} from "react-bootstrap";
 import { useParams } from 'react-router-dom';
 import { db } from "../firebase";
 import { useAuth } from "../contexts/AuthContext"
@@ -11,7 +10,8 @@ export default function Session() {
     let { sessionId } = useParams();
     const { currentUser } = useAuth()
     const [isAuthorized, setIsAuthorized] = useState(false)
-    const restaurantRequest = useNearbyRestaurants();
+
+    const restaurantRequest = useNearbyRestaurants(sessionId);
 
     useEffect(() => {
         const validateUser = async() => {
@@ -29,19 +29,26 @@ export default function Session() {
         }
 
         validateUser()
+
+        console.log(restaurantRequest.data)
         
-    }, [currentUser.uid, sessionId])
+    }, [currentUser.uid, sessionId, restaurantRequest.data])
 
     return(
-        <CenteredContainer>
+        <div>
             {isAuthorized && (
-                <Card className="shadow">
+                <>
+                <Card className="shadow-sm">
                     <Card.Body>
                         <Card.Title>
-                            Session {sessionId}
+                            Session ID {sessionId}
                         </Card.Title>
                     </Card.Body>
                 </Card>
+                <Container className="my-3">
+                    
+                </Container>
+                </>
             )}
             {!isAuthorized && (
                 <Card>
@@ -50,6 +57,6 @@ export default function Session() {
                     </Card.Title>
                 </Card>
             )}
-        </CenteredContainer>
+        </div>
     )
 }
