@@ -86,7 +86,7 @@ export default function Session() {
            
             {restaurantRequest.data.length > 0 ? (
 
-              currentIndex == restaurantRequest.data.length ? (
+              currentIndex === restaurantRequest.data.length ? (
                 <Card>
                    <Card.Body><Button variant="primary" onClick={handleSubmitSwipes}>Submit</Button></Card.Body>
                 </Card>
