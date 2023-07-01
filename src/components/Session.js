@@ -11,40 +11,54 @@ export default function Session() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { currentUser } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
-
+  const [selected, setSelected] = useState([])
   const restaurantRequest = useNearbyRestaurants(sessionId);
+  console.log(restaurantRequest)
 
   const handleSwipeLeft = (restaurant) => {
     // Handle swiping left action
     console.log(`Swiped left on ${restaurant.name}`);
+    console.log(restaurant)
     nextCard();
   };
 
-  const handleSwipeRight = async (restaurant) => {
+  const handleSwipeRight = (restaurant) => {
     // Handle swiping right action
     console.log(`Swiped right on ${restaurant.name}`);
-    const swipes = restaurant.swipes
-    swipes.push(currentUser.uid)
-    const data = (await db.sessions.doc(sessionId).collection('restaurants').doc(restaurant.id).set(restaurant));
+    setSelected(prev => [...prev, restaurant.id])
+    console.log(restaurant)
     nextCard();
   };
 
   const nextCard = () => {
     setCurrentIndex(
-      (prevIndex) => (prevIndex + 1) % restaurantRequest.data.length
+      (prevIndex) => (prevIndex + 1)
     );
   };
 
+  const handleSubmitSwipes = async () => {
+    const sess = await db.sessions.doc(sessionId)
+    const swipes = sess.collection("swipes"); 
+    const userSwipes = swipes.doc(currentUser.uid)
+    userSwipes.set({
+      restaurants: selected,
+    
+    })
+  }
+
+  const handleResetSwipes = async () => {
+    setSelected([])
+    setCurrentIndex(0)
+  }
+
   useEffect(() => {
+
     const validateUser = async () => {
       try {
-        const doc = await db.sessions.doc(sessionId).get();
-        const users = doc.data().users;
-        if (users.includes(currentUser.uid)) {
-          setIsAuthorized(true);
-        } else {
-          setIsAuthorized(false);
-        }
+        const doc = await db.sessions.doc(sessionId).get()
+        const users = doc.data().users
+        setIsAuthorized(users.includes(currentUser.uid));
+     
       } catch (err) {
         console.log(err);
       }
@@ -52,7 +66,7 @@ export default function Session() {
 
     validateUser();
 
-    console.log(restaurantRequest.data);
+
   }, [currentUser.uid, sessionId, restaurantRequest.data]);
 
   return (
@@ -63,18 +77,28 @@ export default function Session() {
             <Container>
               <Navbar.Brand>Session ID {sessionId}</Navbar.Brand>
               <Nav className="me-auto">
-                <Button className="mx-2" variant="success">Submit</Button>
+                <Button className="mx-2" variant="warning" onClick={handleResetSwipes}>reset</Button>
                 <Button className="mx-2" variant="danger" as={Link} to="/" >Exit</Button>
               </Nav>
             </Container>
           </Navbar>
           <Container className="mt-5 d-flex justify-content-center">
+           
             {restaurantRequest.data.length > 0 ? (
-              <RestaurantCard
+
+              currentIndex === restaurantRequest.data.length ? (
+                <Card>
+                   <Card.Body><Button variant="primary" onClick={handleSubmitSwipes}>Submit</Button></Card.Body>
+                </Card>
+               
+              ) : (
+                <RestaurantCard
                 data={restaurantRequest.data[currentIndex]}
                 onSwipeLeft={handleSwipeLeft}
                 onSwipeRight={handleSwipeRight}
               />
+              )
+              
             ) : (
               <p>No restaurants available.</p>
             )}
