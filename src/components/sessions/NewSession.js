@@ -1,4 +1,4 @@
-import { Button, Form } from "react-bootstrap";
+import { Alert, Button, Form } from "react-bootstrap";
 import React, { useState } from "react";
 import { db } from "../../firebase";
 import { useAuth } from "../../contexts/AuthContext";
@@ -10,6 +10,7 @@ function NewSession() {
   const navigate = useNavigate();
   const [session, setSession] = useState('')
   const [email, setEmail] = useState('')
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     location: "",
     radius: "",
@@ -71,8 +72,8 @@ function NewSession() {
       db.sessions.doc(session).set({
         users: arr
       })
-      console.log(arr)
     } catch(err) {
+      setError("Cannot invite this user. Please make sure that this user has an account.")
       console.log(err)
     }
   }
@@ -120,6 +121,7 @@ function NewSession() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="example@email.com"
           />
+            {error && <Alert variant="danger">{error}</Alert>}
           </Form.Group>
           <div className="d-flex justify-content-between">
             <Button type="submit" onClick={inviteUser} variant="primary">
