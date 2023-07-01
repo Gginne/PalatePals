@@ -3,6 +3,7 @@ import { Form, Button, Card, Alert } from "react-bootstrap"
 import { useAuth } from "../../contexts/AuthContext"
 import { Link, Navigate, useNavigate } from "react-router-dom"
 import CenteredContainer from "../commons/CenteredContainer"
+import { db } from "../../firebase";
 
 export default function Signup() {
   const { currentUser } = useAuth()
@@ -25,7 +26,13 @@ export default function Signup() {
     try {
       setError("")
       setLoading(true)
-      await signup(emailRef.current.value, passwordRef.current.value)
+      const data = {
+        email: emailRef.current.value
+      }
+      const result = await signup(emailRef.current.value, passwordRef.current.value)
+      console.log(result.user.uid)
+      console.log(emailRef)
+      db.users.doc(result.user.uid).set(data)
       navigate("/")
     } catch(e) {
       console.log(e)
