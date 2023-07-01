@@ -3,13 +3,13 @@ import { Container, Navbar, Nav, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { db } from "../firebase";
-import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
+import RestaurantCard from "./places/RestaurantCard";
 
 export default function Session() {
   let { sessionId } = useParams();
 
-  const { currentUser } = useAuth();
+ 
   const [matches, setMatches] = useState([]);
   const [resultsReady, setResultsReady] = useState(null);
 
@@ -24,31 +24,29 @@ export default function Session() {
       const session = await sessionRef.get();
       const noOfUsers = session.data().users.length;
 
-      if(swipes.length == noOfUsers){
-        const restaurants = swipes.map(swipe => swipe.restaurants)
-        const findCommonElements = (arrays) => {
-            if (arrays.length === 0) {
-              return [];
-            }
-          
-            // Reduce the arrays into a single array
-            const flattenedArray = arrays.reduce((acc, curr) => acc.concat(curr));
-          
-            // Filter the elements that are present in all arrays
-            const commonElements = flattenedArray.filter((element, index, array) => {
-              return array.indexOf(element) === index && arrays.every((array) => array.includes(element));
-            });
-
-            console.log(commonElements)
-          
-            return commonElements;
-          };
-        setMatches(findCommonElements(restaurants))          
-      }
-    
       setResultsReady((swipes.length  === noOfUsers));
 
-      
+      if(swipes.length == noOfUsers){
+        const restaurants = swipes.map(swipe => swipe.restaurants)
+        const findCommonElements = (arrays) =>arrays.reduce((acc, curr) => acc.filter((element) => curr.includes(element)));
+        const matchedIds = findCommonElements(restaurants)  
+
+        
+        let matchedRestaurants = []
+        
+        for(const id of matchedIds){
+            const restaurantRef = sessionRef.collection('restaurants').doc(id)
+            const restaurantQuery = await restaurantRef.get()
+            
+            const restaurantData = restaurantQuery.data()
+            matchedRestaurants.push(restaurantData)
+        }
+  
+        setMatches(matchedRestaurants)
+        
+                
+      }
+    
     });
     // Clean up the listener on component unmount
     return () => {
@@ -71,8 +69,17 @@ export default function Session() {
       <Container className="mt-5">
         {
           resultsReady ? (
+            <>
             <h1>Matched Restaurants</h1>
-          ) : (<h1>Waiting for your partner to finish his selection...</h1>)
+            <div className="row mt-3">
+                <div className="col-sm-3">
+                    {matches.map((data) => (
+                        <RestaurantCard data={data} displayOnly />
+                    ))}
+                </div>
+            </div>
+            </>
+          ) : (<h1>Waiting for your partner to finish their selection...</h1>)
 
         }
         

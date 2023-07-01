@@ -71,7 +71,7 @@ export default function Session() {
     return () => {
       unsubscribe();
     };
-  }, [sessionId, currentUser]);
+  }, [sessionId, currentUser, navigate]);
 
   return (
     <div>

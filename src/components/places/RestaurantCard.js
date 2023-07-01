@@ -1,13 +1,19 @@
-import React from 'react';
-import { Card, Button, Badge } from 'react-bootstrap';
+import React from "react";
+import { Card, Button, Badge } from "react-bootstrap";
 
-export default function RestaurantCard({ data, onSwipeLeft, onSwipeRight }) {
+export default function RestaurantCard({
+  displayOnly = false,
+  data,
+  onSwipeLeft,
+  onSwipeRight,
+}) {
   return (
-    <Card className="my-2 shadow-sm w-100" style={{maxWidth: '25rem'}}>
+    <Card className="my-2 shadow-sm w-100" style={{ maxWidth: "25rem" }}>
       <Card.Body>
         <Card.Title>{data.name}</Card.Title>
         <Card.Text>
-          {data.address}<br />
+          {data.address}
+          <br />
           <small className="text-muted">Distance: {data.distance} meters</small>
         </Card.Text>
         <div>
@@ -18,13 +24,16 @@ export default function RestaurantCard({ data, onSwipeLeft, onSwipeRight }) {
           ))}
         </div>
       </Card.Body>
-      <Card.Footer className="d-flex justify-content-between align-items-center">
-       
-        
-          <Button variant="danger" onClick={() => onSwipeLeft(data)}>Yuck!</Button>
-          <Button variant="success" onClick={() => onSwipeRight(data)}>Yum!</Button>
-        
-      </Card.Footer>
+      {!displayOnly && (
+        <Card.Footer className="d-flex justify-content-between align-items-center">
+          <Button variant="danger" onClick={() => onSwipeLeft(data)}>
+            Yuck!
+          </Button>
+          <Button variant="success" onClick={() => onSwipeRight(data)}>
+            Yum!
+          </Button>
+        </Card.Footer>
+      )}
     </Card>
   );
 }
