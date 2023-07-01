@@ -1,19 +1,21 @@
 import { useEffect } from "react";
-import { Card, Container, Navbar, Nav, Button } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
+import { Card, Container, Navbar, Button } from "react-bootstrap";
+import { useParams } from "react-router-dom";
 import { db } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
 import useNearbyRestaurants from "../hooks/useNearbyRestaurants";
 import RestaurantCard from "./places/RestaurantCard";
+import { useNavigate } from "react-router-dom";
 export default function Session() {
+
   let { sessionId } = useParams();
   const [currentIndex, setCurrentIndex] = useState(0);
   const { currentUser } = useAuth();
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [selected, setSelected] = useState([]);
   const restaurantRequest = useNearbyRestaurants(sessionId);
-  console.log(restaurantRequest);
+  const navigate = useNavigate()
+
 
   const handleSwipeLeft = (restaurant) => {
     // Handle swiping left action
@@ -41,6 +43,7 @@ export default function Session() {
     userSwipes.set({
       restaurants: selected,
     });
+    navigate(`/session/${sessionId}/results`)
   };
 
   const handleResetSwipes = async () => {
@@ -48,65 +51,31 @@ export default function Session() {
     setCurrentIndex(0);
   };
 
-  useEffect(() => {
-    const validateUser = async () => {
-      try {
-        const doc = await db.sessions.doc(sessionId).get();
-        const users = doc.data().users;
-        setIsAuthorized(users.includes(currentUser.uid));
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    validateUser();
-  }, [currentUser.uid, sessionId]);
-
+ 
   useEffect(() => {
     // Create the listener
+
     const sessionRef = db.sessions.doc(sessionId);
     const swipesRef = sessionRef.collection('swipes');
 
     const unsubscribe = swipesRef.onSnapshot(async (snapshot) => {
-      const noOfSwipes = snapshot.docs.map(db.formatDoc).length
-  
-      const session = await sessionRef.get()
-      const noOfUsers = session.data().users.length
-
-      if(noOfSwipes === noOfUsers){
-        console.log("Every One Submitted!")
+      const swipes = snapshot.docs.map(db.formatDoc)
+   
+      if(swipes.find(swipe => swipe.id === currentUser.uid)) {
+        console.log("User has already chosen his preferences")
+        navigate(`/session/${sessionId}/results`)
       }
-
-    
 
     });
     // Clean up the listener on component unmount
     return () => {
       unsubscribe();
     };
-  }, [sessionId]);
+  }, [sessionId, currentUser, navigate]);
 
   return (
     <div>
-      {isAuthorized && (
-        <>
-          <Navbar className="bg-white shadow-sm" data-bs-theme="dark">
-            <Container>
-              <Navbar.Brand>Session ID {sessionId}</Navbar.Brand>
-              <Nav className="me-auto">
-                <Button
-                  className="mx-2"
-                  variant="warning"
-                  onClick={handleResetSwipes}
-                >
-                  reset
-                </Button>
-                <Button className="mx-2" variant="danger" as={Link} to="/">
-                  Exit
-                </Button>
-              </Nav>
-            </Container>
-          </Navbar>
+          <Navbar className="bg-white shadow-sm" data-bs-theme="dark" />
           <Container className="mt-5 d-flex justify-content-center">
             {restaurantRequest.data.length > 0 ? (
               currentIndex === restaurantRequest.data.length ? (
@@ -122,21 +91,16 @@ export default function Session() {
                   data={restaurantRequest.data[currentIndex]}
                   onSwipeLeft={handleSwipeLeft}
                   onSwipeRight={handleSwipeRight}
+                  session={sessionId}
+                  reset={handleResetSwipes}
                 />
               )
             ) : (
               <p>No restaurants available.</p>
             )}
           </Container>
-        </>
-      )}
-      {!isAuthorized && (
-        <Card>
-          <Card.Title>
-            Sorry, you are not authorized to join this session.
-          </Card.Title>
-        </Card>
-      )}
+      
+    
     </div>
   );
 }

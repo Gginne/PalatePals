@@ -6,7 +6,8 @@ import Dashboard from "./Dashboard";
 import Login from "./auth/Login";
 import Session from "./Session";
 import AuthLayout from "./auth/AuthLayout";
-
+import SessionResults from "./SessionResults";
+import SessionLayout from "./sessions/SessionLayout"
 
 function App() {
   return (
@@ -20,8 +21,13 @@ function App() {
             
             <Route exact path="/" element={<Dashboard />} />
 
+            <Route exact path="/session/:sessionId" element={<SessionLayout />}>
+              <Route exact path='/session/:sessionId/' element={<Session />} />
+              <Route exact path='/session/:sessionId/results' element={<SessionResults />} />
+            </Route>
         
-            <Route exact path='/session/:sessionId' element={<Session />} />
+            
+            
             
           
         </Route>
