@@ -2,11 +2,10 @@ import { Card, Badge, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 export default function SessionCard({ data }) {
   return (
-    <Card>
-      <Card.Header>
-        <Card.Title>ID: {data.id}</Card.Title>
-      </Card.Header>
+    <Card className="shadow-sm">
+    
       <Card.Body>
+      <Card.Title>{data.title}</Card.Title>
         <Card.Text>
           <b>People: </b>
           {data.users.map((user, index) => (

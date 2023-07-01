@@ -14,6 +14,7 @@ function NewSessionForm() {
   const [formData, setFormData] = useState({
     location: "",
     radius: "",
+    title: "",
   });
 
   function handleChangeNewSession(e) {
@@ -34,6 +35,7 @@ function NewSessionForm() {
 
     const data = {
       users: [currentUser.uid],
+      title: formData.title,
       lat,
       long,
       radius: formData.radius,
@@ -41,7 +43,7 @@ function NewSessionForm() {
     try {
      const result = await db.sessions.add(data);
      const restaurantRequest = await getRestaurants(lat, long, formData.radius);
-     const sess = await db.sessions.doc(result.id)
+     const sess = db.sessions.doc(result.id)
      const restaurants = sess.collection("restaurants"); 
      restaurantRequest.forEach(restaurant => {
         const id = restaurant.fsq_id
@@ -69,8 +71,9 @@ function NewSessionForm() {
       const users = await db.sessions.doc(session).get()
       var arr = users.data().users
       arr.push(id)
-      db.sessions.doc(session).set({
-        users: arr
+     
+      db.sessions.doc(session).update({
+        users: arr,
       })
       navigate(`/session/${session}`)
     } catch(err) {
@@ -85,6 +88,16 @@ function NewSessionForm() {
     <div>
       {!session && (
         <Form>
+        <Form.Group>
+        <Form.Label>Title</Form.Label>
+          <Form.Control
+            type="text"
+            name="title"
+            placeholder="Enter title for your sessison"
+            value={formData.title}
+            onChange={handleChangeNewSession}
+          />
+        </Form.Group>
         <Form.Group>
           <Form.Label>Location</Form.Label>
           <Form.Control
