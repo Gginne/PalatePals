@@ -20,6 +20,7 @@ export const firestore = app.firestore()
 
 export const db = {
   sessions: firestore.collection("sessions"),
+  users: firestore.collection("users"),
   formatDoc: doc => {
     return { id: doc.id, ...doc.data() }
   },

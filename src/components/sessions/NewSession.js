@@ -8,6 +8,8 @@ import { getLocation, getRestaurants } from "../../api/api";
 function NewSession() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const [session, setSession] = useState('')
+  const [email, setEmail] = useState('')
   const [formData, setFormData] = useState({
     location: "",
     radius: "",
@@ -38,7 +40,6 @@ function NewSession() {
     try {
      const result = await db.sessions.add(data);
      const restaurantRequest = await getRestaurants(lat, long, formData.radius);
-     console.log(restaurantRequest)
      const sess = await db.sessions.doc(result.id)
      const restaurants = sess.collection("restaurants"); 
      restaurantRequest.forEach(restaurant => {
@@ -52,37 +53,85 @@ function NewSession() {
           categories: restaurant.categories
         })
      })
-     navigate(`/session/${result.id}`)
+     setSession(result.id)
     } catch (e) {
       console.log(e);
     }
   };
 
+  const inviteUser = async(e) => {
+    e.preventDefault()
+    try {
+      const query = await db.users.where('email', '==', email).limit(1).get()
+      const userData = await db.formatDoc(query.docs[0])
+      const id = userData.id
+      const users = await db.sessions.doc(session).get()
+      var arr = users.data().users
+      arr.push(id)
+      db.sessions.doc(session).set({
+        users: arr
+      })
+      console.log(arr)
+    } catch(err) {
+      console.log(err)
+    }
+  }
+
+  const goToSession = () => {
+    navigate(`/session/${session}`)
+  }
+
   return (
-    <Form>
-      <Form.Group>
-        <Form.Label>Location</Form.Label>
-        <Form.Control
-          type="text"
-          name="location"
-          placeholder="Enter location"
-          value={formData.location}
-          onChange={handleChangeNewSession}
-        />
-      </Form.Group>
-      <Form.Group>
-        <Form.Label>Radius (Miles)</Form.Label>
-        <Form.Control
-          type="number"
-          name="radius"
-          placeholder="1"
-          onChange={handleChangeNewSession}
-        />
-      </Form.Group>
-      <Button type="submit" onClick={createNewSession} variant="primary">
-        Let's go!
-      </Button>
-    </Form>
+    <div>
+      {!session && (
+        <Form>
+        <Form.Group>
+          <Form.Label>Location</Form.Label>
+          <Form.Control
+            type="text"
+            name="location"
+            placeholder="Enter location"
+            value={formData.location}
+            onChange={handleChangeNewSession}
+          />
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>Radius (Miles)</Form.Label>
+          <Form.Control
+            type="number"
+            name="radius"
+            placeholder="1"
+            onChange={handleChangeNewSession}
+          />
+        </Form.Group>
+        <Button type="submit" onClick={createNewSession} variant="primary">
+          Let's go!
+        </Button>
+      </Form>
+      )}
+      {session && (
+        <Form>
+          <Form.Group>
+            <Form.Label>Invite user to session {session}</Form.Label>
+            <Form.Control
+            type="email"
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="example@email.com"
+          />
+          </Form.Group>
+          <div className="d-flex justify-content-between">
+            <Button type="submit" onClick={inviteUser} variant="primary">
+              Invite
+            </Button>
+            <Button onClick={goToSession} variant="success">
+              Go to session
+            </Button>
+          </div>
+        </Form>
+      )}
+    </div>
   );
 }
 
