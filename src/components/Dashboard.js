@@ -1,40 +1,33 @@
-import React, { useState } from "react";
-import { Button, Card, Tab, Tabs } from "react-bootstrap";
-import CenteredContainer from "./commons/CenteredContainer";
-import NewSession from "./sessions/NewSession";
-import JoinExistingSession from "./sessions/JoinExistingSession";
+import React, { useEffect, useState } from "react";
+
+import CreateSessionModal from "./sessions/CreateSessionModal";
+import SessionCard from "./sessions/SessionCard";
 import { useAuth } from "../contexts/AuthContext";
+import { db } from "../firebase";
 
 export default function Dashboard() {
-  const {logout, currentUser} = useAuth()
-
-  const [form, setForm] = useState("join");
+  const { currentUser } = useAuth();
+  const [sessions, setSessions] = useState([]);
+  useEffect(() => {
+    return db.sessions
+      .where("users", "array-contains", currentUser.uid)
+      .onSnapshot((snapshot) => {
+        setSessions(snapshot.docs.map(db.formatDoc));
+      });
+  }, [currentUser]);
+  console.log(sessions);
   return (
-    <CenteredContainer>
-      <Card className="shadow">
-        <Card.Header>
-          <Card.Title>{currentUser.email}</Card.Title>
-        </Card.Header>
-       
-        <Card.Body>
+    <div className="container mt-5 w-100">
+      <CreateSessionModal />
+      <div className="row mt-2">
         
-          <Tabs
-            id="controlled-tab-example"
-            activeKey={form}
-            onSelect={(k) => setForm(k)}
-            className="mb-3"
-          >
-            <Tab eventKey="join" title="Join Session">
-              <JoinExistingSession />
-            </Tab>
-            <Tab eventKey="create" title="Create Session">
-              <NewSession />
-            </Tab>
-            
-          </Tabs>
-        </Card.Body>
-        <Button variant="danger" onClick={logout}>Logout</Button>
-      </Card>
-    </CenteredContainer>
+          {sessions.map((session) => (
+            <div className="col-sm-6 my-1">
+              <SessionCard data={session} />
+            </div>
+          ))}
+        
+      </div>
+    </div>
   );
 }

@@ -5,7 +5,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from 'react-router-dom';
 import { getLocation, getRestaurants } from "../../api/api";
 
-function NewSession() {
+function NewSessionForm() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [session, setSession] = useState('')
@@ -72,15 +72,14 @@ function NewSession() {
       db.sessions.doc(session).set({
         users: arr
       })
+      navigate(`/session/${session}`)
     } catch(err) {
       setError("Cannot invite this user. Please make sure that this user has an account.")
       console.log(err)
     }
   }
 
-  const goToSession = () => {
-    navigate(`/session/${session}`)
-  }
+ 
 
   return (
     <div>
@@ -125,11 +124,9 @@ function NewSession() {
           </Form.Group>
           <div className="d-flex justify-content-between">
             <Button type="submit" onClick={inviteUser} variant="primary">
-              Invite
+              Invite Partner & Create Session
             </Button>
-            <Button onClick={goToSession} variant="success">
-              Go to session
-            </Button>
+         
           </div>
         </Form>
       )}
@@ -137,4 +134,4 @@ function NewSession() {
   );
 }
 
-export default NewSession;
+export default NewSessionForm;

@@ -26,7 +26,7 @@ export default function Session() {
 
       setResultsReady((swipes.length  === noOfUsers));
 
-      if(swipes.length == noOfUsers){
+      if(swipes.length === noOfUsers){
         const restaurants = swipes.map(swipe => swipe.restaurants)
         const findCommonElements = (arrays) =>arrays.reduce((acc, curr) => acc.filter((element) => curr.includes(element)));
         const matchedIds = findCommonElements(restaurants)  
@@ -72,11 +72,13 @@ export default function Session() {
             <>
             <h1>Matched Restaurants</h1>
             <div className="row mt-3">
-                <div className="col-sm-3">
+               
                     {matches.map((data) => (
+                       <div className="col-sm-3">
                         <RestaurantCard data={data} displayOnly />
+                      </div>
                     ))}
-                </div>
+                
             </div>
             </>
           ) : (<h1>Waiting for your partner to finish their selection...</h1>)

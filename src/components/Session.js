@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { Card, Container, Navbar, Nav, Button } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
+import { Card, Container, Navbar, Button } from "react-bootstrap";
+import { useParams } from "react-router-dom";
 import { db } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { useState } from "react";
@@ -75,24 +75,7 @@ export default function Session() {
 
   return (
     <div>
-    
-          <Navbar className="bg-white shadow-sm" data-bs-theme="dark">
-            <Container>
-              <Navbar.Brand>Session ID {sessionId}</Navbar.Brand>
-              <Nav className="me-auto">
-                <Button
-                  className="mx-2"
-                  variant="warning"
-                  onClick={handleResetSwipes}
-                >
-                  reset
-                </Button>
-                <Button className="mx-2" variant="danger" as={Link} to="/">
-                  Exit
-                </Button>
-              </Nav>
-            </Container>
-          </Navbar>
+          <Navbar className="bg-white shadow-sm" data-bs-theme="dark" />
           <Container className="mt-5 d-flex justify-content-center">
             {restaurantRequest.data.length > 0 ? (
               currentIndex === restaurantRequest.data.length ? (
@@ -108,6 +91,8 @@ export default function Session() {
                   data={restaurantRequest.data[currentIndex]}
                   onSwipeLeft={handleSwipeLeft}
                   onSwipeRight={handleSwipeRight}
+                  session={sessionId}
+                  reset={handleResetSwipes}
                 />
               )
             ) : (
