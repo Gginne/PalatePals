@@ -11,63 +11,80 @@ export default function Session() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { currentUser } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
-  const [selected, setSelected] = useState([])
+  const [selected, setSelected] = useState([]);
   const restaurantRequest = useNearbyRestaurants(sessionId);
-  console.log(restaurantRequest)
+  console.log(restaurantRequest);
 
   const handleSwipeLeft = (restaurant) => {
     // Handle swiping left action
     console.log(`Swiped left on ${restaurant.name}`);
-    console.log(restaurant)
+    console.log(restaurant);
     nextCard();
   };
 
   const handleSwipeRight = (restaurant) => {
     // Handle swiping right action
     console.log(`Swiped right on ${restaurant.name}`);
-    setSelected(prev => [...prev, restaurant.id])
-    console.log(restaurant)
+    setSelected((prev) => [...prev, restaurant.id]);
+    console.log(restaurant);
     nextCard();
   };
 
   const nextCard = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex + 1)
-    );
+    setCurrentIndex((prevIndex) => prevIndex + 1);
   };
 
   const handleSubmitSwipes = async () => {
-    const sess = await db.sessions.doc(sessionId)
-    const swipes = sess.collection("swipes"); 
-    const userSwipes = swipes.doc(currentUser.uid)
+    const sess = await db.sessions.doc(sessionId);
+    const swipes = sess.collection("swipes");
+    const userSwipes = swipes.doc(currentUser.uid);
     userSwipes.set({
       restaurants: selected,
-    
-    })
-  }
+    });
+  };
 
   const handleResetSwipes = async () => {
-    setSelected([])
-    setCurrentIndex(0)
-  }
+    setSelected([]);
+    setCurrentIndex(0);
+  };
 
   useEffect(() => {
-
     const validateUser = async () => {
       try {
-        const doc = await db.sessions.doc(sessionId).get()
-        const users = doc.data().users
+        const doc = await db.sessions.doc(sessionId).get();
+        const users = doc.data().users;
         setIsAuthorized(users.includes(currentUser.uid));
-     
       } catch (err) {
         console.log(err);
       }
     };
 
     validateUser();
+  }, [currentUser.uid, sessionId]);
 
+  useEffect(() => {
+    // Create the listener
+    const sessionRef = db.sessions.doc(sessionId);
+    const swipesRef = sessionRef.collection('swipes');
 
-  }, [currentUser.uid, sessionId, restaurantRequest.data]);
+    const unsubscribe = swipesRef.onSnapshot(async (snapshot) => {
+      const noOfSwipes = snapshot.docs.map(db.formatDoc).length
+  
+      const session = await sessionRef.get()
+      const noOfUsers = session.data().users.length
+
+      if(noOfSwipes === noOfUsers){
+        console.log("Every One Submitted!")
+      }
+
+    
+
+    });
+    // Clean up the listener on component unmount
+    return () => {
+      unsubscribe();
+    };
+  }, [sessionId]);
 
   return (
     <div>
@@ -77,28 +94,36 @@ export default function Session() {
             <Container>
               <Navbar.Brand>Session ID {sessionId}</Navbar.Brand>
               <Nav className="me-auto">
-                <Button className="mx-2" variant="warning" onClick={handleResetSwipes}>reset</Button>
-                <Button className="mx-2" variant="danger" as={Link} to="/" >Exit</Button>
+                <Button
+                  className="mx-2"
+                  variant="warning"
+                  onClick={handleResetSwipes}
+                >
+                  reset
+                </Button>
+                <Button className="mx-2" variant="danger" as={Link} to="/">
+                  Exit
+                </Button>
               </Nav>
             </Container>
           </Navbar>
           <Container className="mt-5 d-flex justify-content-center">
-           
             {restaurantRequest.data.length > 0 ? (
-
               currentIndex === restaurantRequest.data.length ? (
                 <Card>
-                   <Card.Body><Button variant="primary" onClick={handleSubmitSwipes}>Submit</Button></Card.Body>
+                  <Card.Body>
+                    <Button variant="primary" onClick={handleSubmitSwipes}>
+                      Submit
+                    </Button>
+                  </Card.Body>
                 </Card>
-               
               ) : (
                 <RestaurantCard
-                data={restaurantRequest.data[currentIndex]}
-                onSwipeLeft={handleSwipeLeft}
-                onSwipeRight={handleSwipeRight}
-              />
+                  data={restaurantRequest.data[currentIndex]}
+                  onSwipeLeft={handleSwipeLeft}
+                  onSwipeRight={handleSwipeRight}
+                />
               )
-              
             ) : (
               <p>No restaurants available.</p>
             )}
