@@ -21,8 +21,8 @@ export default function RestaurantCard({ data, onSwipeLeft, onSwipeRight }) {
       <Card.Footer className="d-flex justify-content-between align-items-center">
        
         
-          <Button variant="danger" onClick={() => onSwipeLeft(data)}>Swipe Left</Button>
-          <Button variant="success" onClick={() => onSwipeRight(data)}>Swipe Right</Button>
+          <Button variant="danger" onClick={() => onSwipeLeft(data)}>Yuck!</Button>
+          <Button variant="success" onClick={() => onSwipeRight(data)}>Yum!</Button>
         
       </Card.Footer>
     </Card>
