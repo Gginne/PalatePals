@@ -9,14 +9,16 @@ export default function useNearbyRestaurants(sessionId){
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
 
-    const fetchAll =  useCallback(async () => {
+    const fetchAll =  useCallback( () => {
 
       try {
         setLoading(true)
-        const sess = await db.sessions.doc(sessionId).collection('restaurants').get()
-        var arr = []
-        sess.forEach(doc => arr.push(doc.data()))
-        setData(arr) 
+        db.sessions.doc(sessionId)
+        .collection('restaurants')
+        .onSnapshot(snapshot => {
+          setData(snapshot.docs.map(db.formatDoc))
+        })
+  
       } catch(err) {
         setError(err)
         console.log(err)

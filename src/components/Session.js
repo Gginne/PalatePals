@@ -11,7 +11,7 @@ export default function Session() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const { currentUser } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
-
+  const [selected, setSelected] = useState([])
   const restaurantRequest = useNearbyRestaurants(sessionId);
   console.log(restaurantRequest)
 
@@ -25,25 +25,25 @@ export default function Session() {
   const handleSwipeRight = (restaurant) => {
     // Handle swiping right action
     console.log(`Swiped right on ${restaurant.name}`);
+    setSelected(prev => [...prev, restaurant.id])
     nextCard();
   };
 
   const nextCard = () => {
     setCurrentIndex(
-      (prevIndex) => (prevIndex + 1) % restaurantRequest.data.length
+      (prevIndex) => (prevIndex + 1)
     );
   };
 
+
   useEffect(() => {
+
     const validateUser = async () => {
       try {
-        const doc = await db.sessions.doc(sessionId).get();
-        const users = doc.data().users;
-        if (users.includes(currentUser.uid)) {
-          setIsAuthorized(true);
-        } else {
-          setIsAuthorized(false);
-        }
+        const doc = await db.sessions.doc(sessionId).get()
+        const users = doc.data().users
+        setIsAuthorized(users.includes(currentUser.uid));
+     
       } catch (err) {
         console.log(err);
       }
@@ -51,7 +51,7 @@ export default function Session() {
 
     validateUser();
 
-    console.log(restaurantRequest.data);
+
   }, [currentUser.uid, sessionId, restaurantRequest.data]);
 
   return (
@@ -62,7 +62,7 @@ export default function Session() {
             <Container>
               <Navbar.Brand>Session ID {sessionId}</Navbar.Brand>
               <Nav className="me-auto">
-                <Button className="mx-2" variant="success">Submit</Button>
+                <Button className="mx-2" variant="warning" onClick={() => setCurrentIndex(0) && setSelected([])}>reset</Button>
                 <Button className="mx-2" variant="danger" as={Link} to="/" >Exit</Button>
               </Nav>
             </Container>
