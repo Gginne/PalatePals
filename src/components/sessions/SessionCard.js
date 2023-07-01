@@ -1,7 +1,7 @@
-import React from "react";
 import { Card, Badge, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 export default function SessionCard({ data }) {
+
   return (
     <Card>
       <Card.Header>
@@ -14,7 +14,7 @@ export default function SessionCard({ data }) {
         <Badge pill variant="info" className="mr-1">
           long: {data.long}
         </Badge>
-        <Card.Text>Users: {data.users.join(", ")}</Card.Text>
+           <Card.Text>Users: {data.users.join(", ")}</Card.Text>
       </Card.Body>
 
       <Card.Footer>

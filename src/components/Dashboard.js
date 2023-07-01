@@ -12,7 +12,16 @@ export default function Dashboard() {
     return db.sessions
       .where("users", "array-contains", currentUser.uid)
       .onSnapshot((snapshot) => {
-        setSessions(snapshot.docs.map(db.formatDoc));
+        var snap = snapshot.docs.map(db.formatDoc)
+        snap.map(entry => {
+          var arr = []
+          entry.users.map(async user => {
+            const email = await db.users.doc(user).get()
+            arr.push(email.data().email)
+          })
+          entry.users = arr
+        })
+        setSessions(snap);
       });
   }, [currentUser]);
   console.log(sessions);
