@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { Container, Navbar, Nav, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Container} from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { db } from "../firebase";
 import { useState } from "react";
@@ -56,16 +55,6 @@ export default function Session() {
 
   return (
     <div>
-      <Navbar className="bg-white shadow-sm" data-bs-theme="dark">
-        <Container>
-          <Navbar.Brand>Session ID {sessionId}</Navbar.Brand>
-          <Nav className="me-auto">
-            <Button className="mx-2" variant="danger" as={Link} to="/">
-              Exit
-            </Button>
-          </Nav>
-        </Container>
-      </Navbar>
       <Container className="mt-5">
         {
           resultsReady ? (
