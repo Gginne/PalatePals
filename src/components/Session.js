@@ -13,18 +13,19 @@ export default function Session() {
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   const restaurantRequest = useNearbyRestaurants(sessionId);
-  console.log(restaurantRequest)
 
   const handleSwipeLeft = (restaurant) => {
     // Handle swiping left action
     console.log(`Swiped left on ${restaurant.name}`);
-    console.log(restaurant)
     nextCard();
   };
 
-  const handleSwipeRight = (restaurant) => {
+  const handleSwipeRight = async (restaurant) => {
     // Handle swiping right action
     console.log(`Swiped right on ${restaurant.name}`);
+    const swipes = restaurant.swipes
+    swipes.push(currentUser.uid)
+    const data = (await db.sessions.doc(sessionId).collection('restaurants').doc(restaurant.id).set(restaurant));
     nextCard();
   };
 

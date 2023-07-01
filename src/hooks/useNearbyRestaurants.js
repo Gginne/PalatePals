@@ -15,7 +15,11 @@ export default function useNearbyRestaurants(sessionId){
         setLoading(true)
         const sess = await db.sessions.doc(sessionId).collection('restaurants').get()
         var arr = []
-        sess.forEach(doc => arr.push(doc.data()))
+        sess.forEach(doc => {
+          var data = doc.data()
+          data['id'] = doc.id
+          arr.push(data)
+        })
         setData(arr) 
       } catch(err) {
         setError(err)
