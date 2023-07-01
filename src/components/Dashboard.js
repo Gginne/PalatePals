@@ -6,12 +6,16 @@ import JoinExistingSession from "./sessions/JoinExistingSession";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Dashboard() {
-  const {logout} = useAuth()
+  const {logout, currentUser} = useAuth()
 
   const [form, setForm] = useState("join");
   return (
     <CenteredContainer>
       <Card className="shadow">
+        <Card.Header>
+          <Card.Title>{currentUser.email}</Card.Title>
+        </Card.Header>
+       
         <Card.Body>
         
           <Tabs
